@@ -4,3 +4,7 @@ Lib
 Scripts
 share
 pyvenv.cfg
+bin
+lib
+lib64
+include
