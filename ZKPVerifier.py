@@ -4,13 +4,15 @@ import json
 import pickle
 import struct
 import random
+import time
 
 import graphIsomorphism
+import feigeFiatShamir
 
 from networkx.utils.misc import graphs_equal
 
-HOST = '10.2.34.137'
-PORT = 27831
+HOST = '10.2.57.30'
+PORT = 27852
 
 verifier_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 verifier_socket.connect((HOST, PORT))
@@ -29,7 +31,24 @@ def recvObject():
         remainingSize = objSize - len(payload)
     
     return pickle.loads(payload)
+
+def __discreteLog(attack=False):
+    print("Loading parameters")
+    params = recvObject()
+    commitment = recvObject()
     
+    c = random.randint(0, params['q'])
+    
+    sendObject(c)
+    
+    t = recvObject()
+
+    LHS = pow(params['g'], t, params['q'])
+    RHS = (commitment) * (pow(params['y'], c, params['q'])) % params['q']
+    
+    print(LHS == RHS)
+    assert LHS == RHS, "Proof failed"
+
 def __graphIsomorphism(attack=False):
     commitmentPayload = recvObject()
     
@@ -67,9 +86,26 @@ def __graphIsomorphism(attack=False):
         else:
             print("Attack failed")
     
+def __feigeFiatShamir(attack=False):
+    recvObj = recvObject()
+    params = {'N': recvObj['N'], 'k': recvObj['k']}
+    V = recvObj['V']
     
-def __discreteLog(attack=False):
+    recvObj = recvObject()
+    r = recvObj['r']
+    x = recvObj['x']
     
+    A = feigeFiatShamir.getBooleanString(params)
+    sendObject(A)
+    
+    Y = recvObject()
+    
+    Y2, XV = feigeFiatShamir.computeY2(params, Y, x, V, A)
+    
+    if all(Y2[_] == XV[_] for _ in range(params['k'])) == True:
+        print(True)
+    
+    assert all(Y2[i] == XV[i] for i in range(params['k'])), "Verification failed"
 
 def main():
     print("0) Graph Isomorphism")
@@ -78,6 +114,7 @@ def main():
     print("3) Knowledge of Representation")
     print("4) Equality of Discrete Logarithms")
     print("5) Inequality of Discrete Logarithms")
+    print("6) Feige-Fiat-Shamir Protocol")
     
     user_choice = input("Enter your choice: ")
     
@@ -96,7 +133,9 @@ def main():
         equality()
     elif int(user_choice) == 5:
         inequality()
-    else:
+    elif int(user_choice) == 6:
+        __feigeFiatShamir()
+    else: 
         print("Invalid choice")
         exit()
     

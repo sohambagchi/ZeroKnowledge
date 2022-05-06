@@ -3,11 +3,14 @@ import threading
 import random
 import pickle
 import struct
+import time
 
 import graphIsomorphism
+import discreteLog
+import feigeFiatShamir
 
-HOST = '10.2.34.137'
-PORT = 27831
+HOST = '10.2.57.30'
+PORT = 27852
 
 prover_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -25,6 +28,41 @@ def recvObject(conn):
         remainingSize = objSize - len(payload)
     
     return pickle.loads(payload)
+
+def __feigeFiatShamir(conn):
+    params = feigeFiatShamir.generateLargePrimes(512)
+    
+    S = feigeFiatShamir.createSecretNumbers(params)
+    V = feigeFiatShamir.getModularSquare(params, S)
+    
+    sendObject(conn, {'N': params['N'], 'V': V, 'k': params['k']})
+    
+    r, x = feigeFiatShamir.commitment(params)
+    
+    sendObject(conn, {'r': r, 'x': x})
+    A = recvObject(conn)
+    
+    Y = feigeFiatShamir.computeY(params, r, S, A)
+    sendObject(conn, Y)
+    
+
+def __discreteLog(conn):
+    # q = discreteLog.generateLargePrime(10)
+    q = discreteLog.createGroup()
+    params, witness = discreteLog.generateParams(q)
+    
+    sendObject(conn, params)
+    
+    r = random.randint(1, params['q'])
+    a = pow(params['g'], r, params['q'])
+    
+    sendObject(conn, a)
+
+    challenge = recvObject(conn)
+    
+    t = r + (challenge * witness)
+    
+    sendObject(conn, t)
 
 def __graphIsomorphism(conn):
     nV = random.randint(10, 50)
@@ -70,7 +108,7 @@ def handleClient(connection, address):
     if int(user_choice) == 0:
         __graphIsomorphism(connection)
     elif int(user_choice) == 1:
-        discreteLog()
+        __discreteLog(connection)
     elif int(user_choice) == 2:
         root()
     elif int(user_choice) == 3:
@@ -79,6 +117,8 @@ def handleClient(connection, address):
         equality()
     elif int(user_choice) == 5:
         inequality()
+    elif int(user_choice) == 6:
+        __feigeFiatShamir(connection)
     else:
         print("Invalid choice")
         exit()
