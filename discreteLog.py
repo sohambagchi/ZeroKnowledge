@@ -16,7 +16,8 @@ def createGroup():
     
     return number.getPrime(10)
 
-def getGroupGenerators(q):
+def getGroupGenerators(q, n = 1):
+    generatorList = list()
     for g in primerange(q//2, q):
         gen = list()
         G = list(range(q))
@@ -30,7 +31,12 @@ def getGroupGenerators(q):
                 gen.append(j)
             p += 1
         if len(G) == len(gen):
-            return g
+            generatorList.append(g)
+        if len(generatorList) == n:
+            return generatorList
+
+def getExponents(g, x, q):
+    return pow(g, x)
 
 def generateParams(q):    
     # all non-identity elements of a cyclic group are generators
@@ -41,7 +47,7 @@ def generateParams(q):
     x = random.randint(0, q)
     
     # y = (g**x) % q
-    y = pow(g, x, q)
+    y = getExponents(g, x, q)
     
     param = {
         "q": q,
