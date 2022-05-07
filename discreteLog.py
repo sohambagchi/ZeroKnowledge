@@ -33,7 +33,10 @@ def getGroupGenerators(q, n = 1):
         if len(G) == len(gen):
             generatorList.append(g)
         if len(generatorList) == n:
-            return generatorList
+            if n == 1:
+                return generatorList[0]
+            else:
+                return generatorList
 
 def getExponents(g, x, q):
     return pow(g, x)
