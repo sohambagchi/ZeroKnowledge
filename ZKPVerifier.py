@@ -6,6 +6,7 @@ import struct
 import random
 import time
 
+import discreteLog
 import graphIsomorphism
 import feigeFiatShamir
 import root
@@ -120,7 +121,7 @@ def __feigeFiatShamir(attack=False):
     
     assert all(Y2[i] == XV[i] for i in range(params['k'])), "Verification failed"
 
-def __knowledgeRepresentation():
+def __knowledgeRepresentation(attack=False):
     recvObj = recvObject()
     y = recvObj['y']
     params = recvObj['params']
@@ -137,7 +138,7 @@ def __knowledgeRepresentation():
     sendObject(c)
     
     t = recvObject()
-    
+
     LHS = (pow(g, t[0], q) * pow(h, t[1], q)) % q
     RHS = a * pow(y, c, q) % q
     

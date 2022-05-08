@@ -127,7 +127,7 @@ def __knowledgeRepresentation(conn):
     c = recvObject(conn)
     
     t = knowledgeRepresentation.getChallengeResponse(c, {'alpha': y['alpha'], 'beta': y['beta']}, {'r1': commitmentObj['r1'], 'r2': commitmentObj['r2']})
-    
+
     sendObject(conn, t)
 
 def __root(conn):

@@ -25,7 +25,10 @@ def getCommitment(q, generators):
     
     
 def getChallengeResponse(challenge, witness, randoms):
-    return (randoms['r1'] + (challenge * witness['alpha']), randoms['r2'] + (challenge * witness['beta']))
+    if isinstance(challenge, int):
+        return (randoms['r1'] + (challenge * witness['alpha']), randoms['r2'] + (challenge * witness['beta']))
+    else:
+        return [(randoms['r1'] + (challenge[0] * witness['alpha']), randoms['r2'] + (challenge[0] * witness['beta'])), (randoms['r1'] + (challenge[1] * witness['alpha']), randoms['r2'] + (challenge[1] * witness['beta']))]
 
 if __name__ == '__main__':
     genParams(nbits=10)
