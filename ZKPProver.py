@@ -13,7 +13,7 @@ import root
 import equality
 
 HOST = '10.2.57.30'
-PORT = 27879
+PORT = 27892
 
 prover_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -63,7 +63,12 @@ def __discreteLog(conn):
 
     challenge = recvObject(conn)
     
-    t = r + (challenge * witness)
+    if isinstance(challenge, int):
+        t = r + (challenge * witness)
+    else:
+        t = [r + (challenge[0] * witness), r + (challenge[1] * witness)]
+        print("Witness:", witness)
+    
     
     sendObject(conn, t)
 
@@ -142,6 +147,9 @@ def __root(conn):
     c = recvObject(conn)
     
     t = root.getResponse(commitmentObj['r'], x, c, params['n'])
+    
+    if not isinstance(t, int):
+        print("Witness:", x % params['n'])
     
     sendObject(conn, t)
 

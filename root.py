@@ -26,9 +26,19 @@ def getChallenge(e):
     return c
 
 def getResponse(r, x, c, n):
-    t = r * (pow(x, c, n) % n)
+    if isinstance(c, int):
+        t = r * (pow(x, c, n) % n)
+    else:
+        t = [r * pow(x, c[0]), r * pow(x, c[1])]
     return t
     
+def extendedEuclidGCDAlgorithm(c_, e):
+    if c_ == 0:
+        return e, 0, 1
+    else:
+        gcd, alpha, beta = extendedEuclidGCDAlgorithm(e % c_, c_)
+        return gcd, beta - (e // c_) * alpha, alpha
+
 if __name__ == '__main__':
     """
         1. Get Params (n, p, q)

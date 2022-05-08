@@ -14,7 +14,7 @@ import equality
 from networkx.utils.misc import graphs_equal
 
 HOST = '10.2.57.30'
-PORT = 27879
+PORT = 27892
 
 verifier_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 verifier_socket.connect((HOST, PORT))
@@ -39,17 +39,28 @@ def __discreteLog(attack=False):
     params = recvObject()
     commitment = recvObject()
     
-    c = random.randint(0, params['q'])
+    if not attack:
+        c = random.randint(0, params['q'])
+    else:
+        c = [random.randint(0, params['q']), random.randint(0, params['q'])]
     
     sendObject(c)
     
     t = recvObject()
 
-    LHS = pow(params['g'], t, params['q'])
-    RHS = (commitment) * (pow(params['y'], c, params['q'])) % params['q']
-    
-    print(LHS == RHS)
-    assert LHS == RHS, "Proof failed"
+    if not attack:
+        LHS = pow(params['g'], t, params['q'])
+        RHS = (commitment) * (pow(params['y'], c, params['q'])) % params['q']
+        
+        print(LHS == RHS)
+        assert LHS == RHS, "Proof failed"
+    else:
+        c_ = c[1] - c[0]
+        t_ = t[1] - t[0]
+        
+        c__ = pow(c_, -1, params['q'])
+        x = (t_ * c__) % params['q']
+        print("Extracted Witness:", x)
 
 def __graphIsomorphism(attack=False):
     commitmentPayload = recvObject()
@@ -134,7 +145,7 @@ def __knowledgeRepresentation():
     
     assert(LHS == RHS), "Proof failed"
 
-def __root():
+def __root(attack=False):
     paramsObj = recvObject()
     
     params = paramsObj['params']
@@ -143,16 +154,32 @@ def __root():
     
     a = recvObject()
     
-    c = random.randint(1, params['q']-1)
-    
+    if not attack:
+        c = random.randint(1, e-1)
+    else:
+        c = [random.randint(0, e), random.randint(0, e)]
+        
     sendObject(c)
     
     t = recvObject()
     
-    LHS = pow(t, e, params['n'])
-    RHS = (a * pow(y, c)) % params['n']
-    
-    print(LHS == RHS)
+    if not attack:
+        LHS = pow(t, e, params['n'])
+        RHS = (a * pow(y, c)) % params['n']
+        
+        print(LHS == RHS)
+        
+        assert (LHS == RHS), "Proof failed"
+    else:
+        if t[0] > t[1]:
+            t = [t[1], t[0]]
+            c = [c[1], c[0]]
+
+        gcd, alpha, beta = root.extendedEuclidGCDAlgorithm(c[1] - c[0], e)
+        
+        x = (pow(t[1]//t[0], alpha, params['n']) % params['n']) * (pow(y, beta, params['n']) % params['n']) % params['n']
+        
+        print("Extracted Witness:", x % params['n'])
 
 def __equality():
     params = recvObject()
@@ -192,9 +219,11 @@ def main():
         toAttack = int(input("Attack? (0/1): "))
         __graphIsomorphism(False if toAttack==0 else True)
     elif int(user_choice) == 1:
-        __discreteLog()
+        toAttack = int(input("Attack? (0/1): "))
+        __discreteLog(False if toAttack==0 else True)
     elif int(user_choice) == 2:
-        __root()
+        toAttack = int(input("Attack? (0/1): "))
+        __root(False if toAttack==0 else True)
     elif int(user_choice) == 3:
         __knowledgeRepresentation()
     elif int(user_choice) == 4:
