@@ -12,7 +12,7 @@ import feigeFiatShamir
 from networkx.utils.misc import graphs_equal
 
 HOST = '10.2.57.30'
-PORT = 27852
+PORT = 27858
 
 verifier_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 verifier_socket.connect((HOST, PORT))
@@ -107,14 +107,41 @@ def __feigeFiatShamir(attack=False):
     
     assert all(Y2[i] == XV[i] for i in range(params['k'])), "Verification failed"
 
+def __knowledgeRepresentation():
+    recvObj = recvObject()
+    y = recvObj['y']
+    params = recvObj['params']
+    
+    q = params['q']
+    g = params['g']
+    h = params['h']
+    
+    
+    a = recvObject()
+    
+    c = random.randint(1, q-1)
+    
+    sendObject(c)
+    
+    t = recvObject()
+    
+    LHS = (pow(g, t[0], q) * pow(h, t[1], q)) % q
+    RHS = a * pow(y, c, q) % q
+    
+    print(LHS == RHS)
+    
+    assert(LHS == RHS), "Proof failed"
+
+# def __root():
+    
+
 def main():
     print("0) Graph Isomorphism")
     print("1) Knowledge of a Discrete Logarithm")
     print("2) Knowledge of an e-th Root Modulo n")
     print("3) Knowledge of Representation")
     print("4) Equality of Discrete Logarithms")
-    print("5) Inequality of Discrete Logarithms")
-    print("6) Feige-Fiat-Shamir Protocol")
+    print("5) Feige-Fiat-Shamir Protocol")
     
     user_choice = input("Enter your choice: ")
     
@@ -128,12 +155,10 @@ def main():
     elif int(user_choice) == 2:
         root()
     elif int(user_choice) == 3:
-        knowledgeRepresentation()
+        __knowledgeRepresentation()
     elif int(user_choice) == 4:
         equality()
     elif int(user_choice) == 5:
-        inequality()
-    elif int(user_choice) == 6:
         __feigeFiatShamir()
     else: 
         print("Invalid choice")

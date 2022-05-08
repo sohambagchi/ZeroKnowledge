@@ -8,9 +8,11 @@ import time
 import graphIsomorphism
 import discreteLog
 import feigeFiatShamir
+import knowledgeRepresentation
+import root
 
 HOST = '10.2.57.30'
-PORT = 27852
+PORT = 27858
 
 prover_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -99,7 +101,32 @@ def __graphIsomorphism(conn):
     else:
         sendObject(conn, psi_0)
         sendObject(conn, psi_1)
+
+def __knowledgeRepresentation(conn):
+    nbits = 512
     
+    q = knowledgeRepresentation.genParams(nbits)
+    generators = knowledgeRepresentation.getGenerators(q, n=2)
+    
+    y = knowledgeRepresentation.getRepresentation(q, generators)
+    
+    sendObj = {"params": {'q': q, 'g': generators[0], 'h': generators[1]}, "y": y['representation']}
+    
+    sendObject(conn, sendObj)
+    
+    commitmentObj = knowledgeRepresentation.getCommitment(q, generators)
+    
+    sendObject(conn, commitmentObj['commitment'])
+    
+    c = recvObject(conn)
+    
+    t = knowledgeRepresentation.getChallengeResponse(c, {'alpha': y['alpha'], 'beta': y['beta']}, {'r1': commitmentObj['r1'], 'r2': commitmentObj['r2']})
+    
+    sendObject(conn, t)
+
+# def __root(conn):
+#     params = root.modulus(20)
+
 def handleClient(connection, address):
     print("New Client:", address)
     
@@ -112,12 +139,10 @@ def handleClient(connection, address):
     elif int(user_choice) == 2:
         root()
     elif int(user_choice) == 3:
-        knowledgeRepresentation()
+        __knowledgeRepresentation(connection)
     elif int(user_choice) == 4:
         equality()
     elif int(user_choice) == 5:
-        inequality()
-    elif int(user_choice) == 6:
         __feigeFiatShamir(connection)
     else:
         print("Invalid choice")
