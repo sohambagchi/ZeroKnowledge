@@ -121,7 +121,7 @@ def __feigeFiatShamir(attack=False):
     
     assert all(Y2[i] == XV[i] for i in range(params['k'])), "Verification failed"
 
-def __knowledgeRepresentation(attack=False):
+def __knowledgeRepresentation():
     recvObj = recvObject()
     y = recvObj['y']
     params = recvObj['params']
@@ -129,7 +129,6 @@ def __knowledgeRepresentation(attack=False):
     q = params['q']
     g = params['g']
     h = params['h']
-    
     
     a = recvObject()
     
