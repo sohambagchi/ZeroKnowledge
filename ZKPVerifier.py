@@ -8,11 +8,13 @@ import time
 
 import graphIsomorphism
 import feigeFiatShamir
+import root
+import equality
 
 from networkx.utils.misc import graphs_equal
 
 HOST = '10.2.57.30'
-PORT = 27858
+PORT = 27879
 
 verifier_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 verifier_socket.connect((HOST, PORT))
@@ -132,7 +134,46 @@ def __knowledgeRepresentation():
     
     assert(LHS == RHS), "Proof failed"
 
-# def __root():
+def __root():
+    paramsObj = recvObject()
+    
+    params = paramsObj['params']
+    e = paramsObj['e']
+    y = paramsObj['y']
+    
+    a = recvObject()
+    
+    c = random.randint(1, params['q']-1)
+    
+    sendObject(c)
+    
+    t = recvObject()
+    
+    LHS = pow(t, e, params['n'])
+    RHS = (a * pow(y, c)) % params['n']
+    
+    print(LHS == RHS)
+
+def __equality():
+    params = recvObject()
+    
+    commitment = recvObject()
+    
+    c = random.randint(1, params['q']-1)
+    
+    sendObject(c)
+    
+    t = recvObject()
+    
+    LHS1 = equality.getExponents(params['g'], t, params['q'])
+    LHS2 = equality.getExponents(params['h'], t, params['q'])
+    
+    RHS1 = (commitment[0] * pow(params['y'], c, params['q'])) % params['q']
+    RHS2 = (commitment[1] * pow(params['z'], c, params['q'])) % params['q']
+    
+    print(LHS1 == RHS1 and LHS2 == RHS2)
+    
+    assert (LHS1 == RHS1 and LHS2 == RHS2), "Proof failed"
     
 
 def main():
@@ -153,11 +194,11 @@ def main():
     elif int(user_choice) == 1:
         __discreteLog()
     elif int(user_choice) == 2:
-        root()
+        __root()
     elif int(user_choice) == 3:
         __knowledgeRepresentation()
     elif int(user_choice) == 4:
-        equality()
+        __equality()
     elif int(user_choice) == 5:
         __feigeFiatShamir()
     else: 

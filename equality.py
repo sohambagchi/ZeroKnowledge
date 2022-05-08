@@ -22,8 +22,6 @@ def generateParams(q):
     g = None
     while g == None:
         g = getGroupGenerators(q)
-    
-    print(q, g)
         
     y = getExponents(g[0], x, q)
     z = getExponents(g[1], x, q)

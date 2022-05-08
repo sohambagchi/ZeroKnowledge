@@ -10,9 +10,10 @@ import discreteLog
 import feigeFiatShamir
 import knowledgeRepresentation
 import root
+import equality
 
 HOST = '10.2.57.30'
-PORT = 27858
+PORT = 27879
 
 prover_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -124,8 +125,43 @@ def __knowledgeRepresentation(conn):
     
     sendObject(conn, t)
 
-# def __root(conn):
-#     params = root.modulus(20)
+def __root(conn):
+    params = root.modulus(20)
+    e = root.get_e(10)
+    witnessObj = root.getWitness(params['n'], e)
+    
+    x = witnessObj['x']
+    y = witnessObj['y']
+    
+    sendObject(conn, {'params': params, 'e': e, 'y': y})
+    
+    commitmentObj = root.getCommitment(params['n'], e)
+    
+    sendObject(conn, commitmentObj['a'])
+    
+    c = recvObject(conn)
+    
+    t = root.getResponse(commitmentObj['r'], x, c, params['n'])
+    
+    sendObject(conn, t)
+
+def __equality(conn):
+    q = equality.createGroup()
+    params, witness = equality.generateParams(q)
+    
+    sendObject(conn, params)
+    
+    r = random.randint(1, q - 1)
+    
+    commitment = (equality.getExponents(params['g'], r, q), equality.getExponents(params['h'], r, q))
+    
+    sendObject(conn, commitment)
+    
+    c = recvObject(conn)
+    
+    t = r + (c * witness)
+    
+    sendObject(conn, t)
 
 def handleClient(connection, address):
     print("New Client:", address)
@@ -137,11 +173,11 @@ def handleClient(connection, address):
     elif int(user_choice) == 1:
         __discreteLog(connection)
     elif int(user_choice) == 2:
-        root()
+        __root(connection)
     elif int(user_choice) == 3:
         __knowledgeRepresentation(connection)
     elif int(user_choice) == 4:
-        equality()
+        __equality(connection)
     elif int(user_choice) == 5:
         __feigeFiatShamir(connection)
     else:
