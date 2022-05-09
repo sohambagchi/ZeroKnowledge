@@ -273,7 +273,7 @@ def __equality():
     
     print('-------- Received Commitment --------')
     commitment = recvObject()
-    print("Commitment:", commitment)")
+    print("Commitment:", commitment)
     c = random.randint(1, params['q']-1)
     print("Challenge Generated:", c)
     sendObject(c)
