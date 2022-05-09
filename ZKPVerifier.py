@@ -195,7 +195,7 @@ def __knowledgeRepresentation():
     g = params['g']
     h = params['h']
     
-    pprint({'Group': {'q': q}, 'Generators': {'g': generators[0], 'h': generators[1]}, 'Representation': y })
+    pprint({'Group': {'q': q}, 'Generators': {'g': params['g'], 'h': params['h']}, 'Representation': y })
     
     a = recvObject()
     print("Commitment:", a)
