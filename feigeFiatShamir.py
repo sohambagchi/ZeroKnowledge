@@ -103,4 +103,7 @@ if __name__ == '__main__':
     print(XV)
 
     for i in range(len(Y2)):
-        print(Y2[i] == XV[i])
+        if (Y2[i] != XV[i]):
+            print(Y2[i], XV[i])
+        else:
+            print(Y2[i] == XV[i])

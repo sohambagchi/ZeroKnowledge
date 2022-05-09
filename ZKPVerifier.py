@@ -15,7 +15,7 @@ import equality
 
 from networkx.utils.misc import graphs_equal
 
-HOST = '10.2.57.30'
+HOST = '127.0.0.1'
 PORT = 27898
 
 verifier_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
