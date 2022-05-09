@@ -7,14 +7,8 @@ import time
 
 from Crypto.Util import number
 
-def generateLargePrime(nbits):
+def createGroup(nbits=10):
     return number.getPrime(nbits)
-
-def createGroup():
-    # generate cyclic group of order q
-    # G = CyclicGroup(q) 
-    
-    return number.getPrime(10)
 
 def getGroupGenerators(q, n = 1):
     generatorList = list()

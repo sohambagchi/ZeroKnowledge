@@ -87,6 +87,11 @@ def generateGraph(n, m):
     # plt.show()
     return G
 
+def printIsomorphism(phi):
+    for k, v in phi[0].items():
+        print(f"{k} -> {v}, ", end='')
+    print(" ")
+
 def main():
     A = generateGraph(10, 17)
     print(A.nodes())
@@ -94,8 +99,9 @@ def main():
     
     
 if __name__ == '__main__':
-    # graphOne = generateGraph(15, 30)
-
+    graphOne = generateGraph(15, 30)
+    print(graphOne.nodes)
+    # print(vars(graphOne))
     
     # p_0 = generatePermutation(len(graphOne.nodes()))
     # graphTwo = shuffleVertices(graphOne, p_0, direction='forward')
@@ -115,33 +121,33 @@ if __name__ == '__main__':
     
     
     # nV  = random.randint(10, 50)
-    nV = 10
-    nE  = random.randint(nV, nV*(nV-1)/2)
+    # nV = 10
+    # nE  = random.randint(nV, nV*(nV-1)/2)
     
-    G_0 = generateGraph(nV, nE)
+    # G_0 = generateGraph(nV, nE)
     
-    phi = generatePermutation(nV)
-    G_1 = shuffleVertices(G_0, phi, direction='forward')
+    # phi = generatePermutation(nV)
+    # G_1 = shuffleVertices(G_0, phi, direction='forward')
     
-    psi_1 = generatePermutation(nV)
-    G_2   = shuffleVertices(G_1, psi_1, direction='forward')
+    # psi_1 = generatePermutation(nV)
+    # G_2   = shuffleVertices(G_1, psi_1, direction='forward')
     
-    psi_0 = combinePermutations(psi_1, phi)
+    # psi_0 = combinePermutations(psi_1, phi)
     
-    G_3 = shuffleVertices(G_0, psi_0, direction='forward')
+    # G_3 = shuffleVertices(G_0, psi_0, direction='forward')
     
-    print(G_0.nodes())
-    print(G_1.nodes())
-    print(G_2.nodes())
-    print(G_3.nodes())
+    # print(G_0.nodes())
+    # print(G_1.nodes())
+    # print(G_2.nodes())
+    # print(G_3.nodes())
     
-    print("")
+    # print("")
     
-    print(phi)
-    print(psi_1)
-    print(psi_0)
+    # print(phi)
+    # print(psi_1)
+    # print(psi_0)
     
-    print(splitPermutation(psi_1, psi_0))
+    # print(splitPermutation(psi_1, psi_0))
     
     # print()
     

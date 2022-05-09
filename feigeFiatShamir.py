@@ -15,8 +15,9 @@ def generateLargePrimes(nbits):
     p = number.getPrime(nbits)
     q = number.getPrime(nbits)
     N = p * q
-    k = random.randint(1, number.getRandomInteger(int(nbits*0.05)))
-    k = 20
+    # k = random.randint(1, number.getRandomInteger(int(nbits*0.05)))
+    # k = 20
+    k = random.randint(1, 100)
     return {'p': p, 'q': q, 'N': N, 'k': k, 'nbits': nbits}
 
 def createSecretNumbers(params):

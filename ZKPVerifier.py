@@ -5,6 +5,7 @@ import pickle
 import struct
 import random
 import time
+from pprint import pprint
 
 import discreteLog
 import graphIsomorphism
@@ -15,7 +16,7 @@ import equality
 from networkx.utils.misc import graphs_equal
 
 HOST = '10.2.57.30'
-PORT = 27892
+PORT = 27898
 
 verifier_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 verifier_socket.connect((HOST, PORT))
@@ -36,22 +37,36 @@ def recvObject():
     return pickle.loads(payload)
 
 def __discreteLog(attack=False):
-    print("Loading parameters")
+    
+    print('# ╔╦╗┬┌─┐┌─┐┬─┐┌─┐┌┬┐┌─┐  ╦  ┌─┐┌─┐ #')
+    print('#  ║║│└─┐│  ├┬┘├┤  │ ├┤   ║  │ ││ ┬ #')
+    print('# ═╩╝┴└─┘└─┘┴└─└─┘ ┴ └─┘  ╩═╝└─┘└─┘ #')
+    
+    print("-------- Received Parameters --------")
     params = recvObject()
+    pprint({'q': params['q'], 'g': params['g'], 'y': params['y']})
+    
+    print("-------- Received Commitment --------")
     commitment = recvObject()
+    pprint({'a': commitment})
     
     if not attack:
         c = random.randint(0, params['q'])
     else:
         c = [random.randint(0, params['q']), random.randint(0, params['q'])]
     
+    print("Generated Challenge:", c)
     sendObject(c)
     
     t = recvObject()
+    
+    print("Received Response:", t)
 
     if not attack:
         LHS = pow(params['g'], t, params['q'])
         RHS = (commitment) * (pow(params['y'], c, params['q'])) % params['q']
+        
+        pprint({"LHS": LHS, "RHS": RHS})
         
         print(LHS == RHS)
         assert LHS == RHS, "Proof failed"
@@ -62,8 +77,20 @@ def __discreteLog(attack=False):
         c__ = pow(c_, -1, params['q'])
         x = (t_ * c__) % params['q']
         print("Extracted Witness:", x)
+        
+    print("-------------------------- END --------------------------\n\n")
 
 def __graphIsomorphism(attack=False):
+    """Prover knows an isomorphism between two graphs, through two permutations. 
+
+    Args:
+        attack (bool, optional): _description_. Defaults to False.
+    """
+    
+    print('# ╔═╗┬─┐┌─┐┌─┐┬ ┬  ╦┌─┐┌─┐┌┬┐┌─┐┬─┐┌─┐┬ ┬┬┌─┐┌┬┐ #')
+    print('# ║ ╦├┬┘├─┤├─┘├─┤  ║└─┐│ │││││ │├┬┘├─┘├─┤│└─┐│││ #')
+    print('# ╚═╝┴└─┴ ┴┴  ┴ ┴  ╩└─┘└─┘┴ ┴└─┘┴└─┴  ┴ ┴┴└─┘┴ ┴ #')
+    
     commitmentPayload = recvObject()
     
     G_0 = commitmentPayload['G_0']
@@ -71,17 +98,30 @@ def __graphIsomorphism(attack=False):
     nV = commitmentPayload['nV']
     nE = commitmentPayload['nE']
     
+    print("-------- Received Parameters --------")
+    
+    pprint({'G_0': G_0.nodes, 'G_1': G_1.nodes, 'Vertices': nV, 'Edges': nE})
+    
     G_2 = recvObject()
+    
+    pprint({'G_2': G_2.nodes})
     
     if not attack:
         c = random.choice([0, 1])
+        
+        print("Challenge Generated:", c)
         
         sendObject([c])
         
         psi_c = recvObject()
         
+        print("Permutation Received: ", end='')
+        graphIsomorphism.printIsomorphism(psi_c)
+        
         G_c = graphIsomorphism.shuffleVertices(G_0 if c==0 else G_1, psi_c, direction='forward')
         
+        pprint({'Permutation Applied': G_c.nodes})
+        print("\n\n")
         print(graphs_equal(G_c, G_2))
         
         assert graphs_equal(G_c, G_2), "Not proved" 
@@ -99,29 +139,54 @@ def __graphIsomorphism(attack=False):
             print("Attack successful, phi obtained")
         else:
             print("Attack failed")
+    print("-------------------------- END --------------------------\n\n")
     
 def __feigeFiatShamir(attack=False):
+    print('# ╔═╗┌─┐┬┌─┐┌─┐  ╔═╗┬┌─┐┌┬┐  ╔═╗┬ ┬┌─┐┌┬┐┬┬─┐ #')
+    print('# ╠╣ ├┤ ││ ┬├┤───╠╣ │├─┤ │───╚═╗├─┤├─┤││││├┬┘ #')
+    print('# ╚  └─┘┴└─┘└─┘  ╚  ┴┴ ┴ ┴   ╚═╝┴ ┴┴ ┴┴ ┴┴┴└─ #')
     recvObj = recvObject()
+    print("-------- Received Parameters --------")
     params = {'N': recvObj['N'], 'k': recvObj['k']}
+    
+    pprint({'N': params['N'], 'k': params['k']})
+    
     V = recvObj['V']
+    print("------------ Received V -------------")
     
     recvObj = recvObject()
+    print("-------- Received Commitment --------")
     r = recvObj['r']
     x = recvObj['x']
+    pprint({'r': r, 'x': x})
     
+    print("------- Generating Challenge --------")
     A = feigeFiatShamir.getBooleanString(params)
+    print(A)
     sendObject(A)
     
     Y = recvObject()
-    
+    print("Y:", Y)
     Y2, XV = feigeFiatShamir.computeY2(params, Y, x, V, A)
     
     if all(Y2[_] == XV[_] for _ in range(params['k'])) == True:
         print(True)
     
     assert all(Y2[i] == XV[i] for i in range(params['k'])), "Verification failed"
+    
+    print("-------------------------- END --------------------------\n\n")
 
 def __knowledgeRepresentation():
+    print('# ╦═╗┌─┐┌─┐┬─┐┌─┐┌─┐┌─┐┌┐┌┌┬┐┌─┐┌┬┐┬┌─┐┌┐┌  ┌─┐┌─┐ #')
+    print('# ╠╦╝├┤ ├─┘├┬┘├┤ └─┐├┤ │││ │ ├─┤ │ ││ ││││  │ │├┤  #')
+    print('# ╩╚═└─┘┴  ┴└─└─┘└─┘└─┘┘└┘ ┴ ┴ ┴ ┴ ┴└─┘┘└┘  └─┘└   #')
+    print('#           ╦╔═┌┐┌┌─┐┬ ┬┬  ┌─┐┌┬┐┌─┐┌─┐            #')
+    print('#           ╠╩╗││││ │││││  ├┤  │││ ┬├┤             #')
+    print('#           ╩ ╩┘└┘└─┘└┴┘┴─┘└─┘─┴┘└─┘└─┘            #')
+    
+    
+    print("-------- Received Parameters --------")
+    
     recvObj = recvObject()
     y = recvObj['y']
     params = recvObj['params']
@@ -130,22 +195,35 @@ def __knowledgeRepresentation():
     g = params['g']
     h = params['h']
     
+    pprint({'Group': {'q': q}, 'Generators': {'g': generators[0], 'h': generators[1]}, 'Representation': y })
+    
     a = recvObject()
+    print("Commitment:", a)
     
     c = random.randint(1, q-1)
+    print("Challenge Generated:", c)
     
     sendObject(c)
     
     t = recvObject()
-
+    print("-------- Received Response --------")
+    pprint({'t1': t[0], 't2': t[1]})
+    
     LHS = (pow(g, t[0], q) * pow(h, t[1], q)) % q
     RHS = a * pow(y, c, q) % q
+    
+    pprint({"LHS": LHS, "RHS": RHS})
     
     print(LHS == RHS)
     
     assert(LHS == RHS), "Proof failed"
+    print("-------------------------- END --------------------------\n\n")
 
 def __root(attack=False):
+    print('# ┌─┐ ┌┬┐┬ ┬  ╦═╗┌─┐┌─┐┌┬┐  ╔╦╗┌─┐┌┬┐┬ ┬┬  ┌─┐ #')
+    print('# ├┤───│ ├─┤  ╠╦╝│ ││ │ │   ║║║│ │ │││ ││  │ │ #')
+    print('# └─┘  ┴ ┴ ┴  ╩╚═└─┘└─┘ ┴   ╩ ╩└─┘─┴┘└─┘┴─┘└─┘ #')
+    
     paramsObj = recvObject()
     
     params = paramsObj['params']
@@ -180,27 +258,41 @@ def __root(attack=False):
         x = (pow(t[1]//t[0], alpha, params['n']) % params['n']) * (pow(y, beta, params['n']) % params['n']) % params['n']
         
         print("Extracted Witness:", x % params['n'])
+    
+    print("-------------------------- END --------------------------\n\n")
 
 def __equality():
+    print('# ╔═╗┌─┐ ┬ ┬┌─┐┬  ┬┌┬┐┬ ┬  ┌─┐┌─┐  ╔╦╗┬┌─┐┌─┐┬─┐┌─┐┌┬┐┌─┐  ╦  ┌─┐┌─┐ #')
+    print('# ║╣ │─┼┐│ │├─┤│  │ │ └┬┘  │ │├┤    ║║│└─┐│  ├┬┘├┤  │ ├┤   ║  │ ││ ┬ #')
+    print('# ╚═╝└─┘└└─┘┴ ┴┴─┘┴ ┴  ┴   └─┘└    ═╩╝┴└─┘└─┘┴└─└─┘ ┴ └─┘  ╩═╝└─┘└─┘ #')
+    
+    print('-------- Received Parameters --------')
     params = recvObject()
     
+    pprint({'Group': {'q': q}, 'Generators': {'g': params['g'], 'h': params['h']}, 'Elements': {'y': params['y'], 'z': params['z']}})
+    
+    print('-------- Received Commitment --------')
     commitment = recvObject()
-    
+    print("Commitment:", commitment)")
     c = random.randint(1, params['q']-1)
-    
+    print("Challenge Generated:", c)
     sendObject(c)
     
     t = recvObject()
-    
+    print("Response Received:", t)
     LHS1 = equality.getExponents(params['g'], t, params['q'])
     LHS2 = equality.getExponents(params['h'], t, params['q'])
     
     RHS1 = (commitment[0] * pow(params['y'], c, params['q'])) % params['q']
     RHS2 = (commitment[1] * pow(params['z'], c, params['q'])) % params['q']
     
+    pprint({"1": {"LHS": LHS1, "RHS": RHS1}, "2": {"LHS": LHS2, "RHS": RHS2}})
+    
     print(LHS1 == RHS1 and LHS2 == RHS2)
     
     assert (LHS1 == RHS1 and LHS2 == RHS2), "Proof failed"
+    
+    print("-------------------------- END --------------------------\n\n")
     
 
 def main():
