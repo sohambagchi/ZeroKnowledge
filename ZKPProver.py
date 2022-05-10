@@ -34,77 +34,6 @@ def recvObject(conn):
     
     return pickle.loads(payload)
 
-def __feigeFiatShamir(conn):
-    print('# ╔═╗┌─┐┬┌─┐┌─┐  ╔═╗┬┌─┐┌┬┐  ╔═╗┬ ┬┌─┐┌┬┐┬┬─┐ #')
-    print('# ╠╣ ├┤ ││ ┬├┤───╠╣ │├─┤ │───╚═╗├─┤├─┤││││├┬┘ #')
-    print('# ╚  └─┘┴└─┘└─┘  ╚  ┴┴ ┴ ┴   ╚═╝┴ ┴┴ ┴┴ ┴┴┴└─ #')
-    
-    print("-------- Generated Parameters --------")
-    
-    params = feigeFiatShamir.generateLargePrimes(512)
-    
-    pprint({'p': params['p'], 'q': params['q'], 'N': params['N'], 'k': params['k']})
-    
-    S = feigeFiatShamir.createSecretNumbers(params)
-    print("Witness:", S)
-    
-    V = feigeFiatShamir.getModularSquare(params, S)
-    print("V:", V)
-    
-    sendObject(conn, {'N': params['N'], 'V': V, 'k': params['k']})
-    
-    r, x = feigeFiatShamir.commitment(params)
-    print("-------- Generated Commitment --------")
-    pprint({'r': r, 'x': x})
-    sendObject(conn, {'r': r, 'x': x})
-    
-    A = recvObject(conn)
-    print("Challenge:", A)
-    
-    Y = feigeFiatShamir.computeY(params, r, S, A)
-    print("Y:", Y)
-    sendObject(conn, Y)
-    
-    print("-------------------------- END --------------------------\n\n")    
-
-def __discreteLog(conn):
-    
-    print('╔╦╗┬┌─┐┌─┐┬─┐┌─┐┌┬┐┌─┐  ╦  ┌─┐┌─┐')
-    print(' ║║│└─┐│  ├┬┘├┤  │ ├┤   ║  │ ││ ┬')
-    print('═╩╝┴└─┘└─┘┴└─└─┘ ┴ └─┘  ╩═╝└─┘└─┘')
-    
-    q = discreteLog.createGroup(nbits=12)
-    params, witness = discreteLog.generateParams(q)    
-    
-    print("-------- Generated Parameters --------")
-    pprint({'q': params['q'], 'g': params['g'], 'y': params['y'], 'Witness': witness})
-    
-    sendObject(conn, params)
-    
-    r = random.randint(1, params['q'])
-    a = pow(params['g'], r, params['q'])
-    
-    print("-------- Generated Commitment --------")
-    pprint({'r': r, 'a': a})
-    
-    sendObject(conn, a)
-
-    challenge = recvObject(conn)
-    
-    print("Received Challenge:", challenge)
-    
-    if isinstance(challenge, int):
-        t = r + (challenge * witness)
-    else:
-        t = [r + (challenge[0] * witness), r + (challenge[1] * witness)]
-        print("Witness:", witness)
-    
-    print("Generated Response:", t)
-    
-    sendObject(conn, t)
-    
-    print("-------------------------- END --------------------------\n\n")
-
 def __graphIsomorphism(conn):
     
     print('# ╔═╗┬─┐┌─┐┌─┐┬ ┬  ╦┌─┐┌─┐┌┬┐┌─┐┬─┐┌─┐┬ ┬┬┌─┐┌┬┐ #')
@@ -166,6 +95,79 @@ def __graphIsomorphism(conn):
         sendObject(conn, psi_1)
     print("-------------------------- END --------------------------\n\n")
 
+
+def __discreteLog(conn):
+    
+    print('╔╦╗┬┌─┐┌─┐┬─┐┌─┐┌┬┐┌─┐  ╦  ┌─┐┌─┐')
+    print(' ║║│└─┐│  ├┬┘├┤  │ ├┤   ║  │ ││ ┬')
+    print('═╩╝┴└─┘└─┘┴└─└─┘ ┴ └─┘  ╩═╝└─┘└─┘')
+    
+    q = discreteLog.createGroup(nbits=12)
+    params, witness = discreteLog.generateParams(q)    
+    
+    print("-------- Generated Parameters --------")
+    pprint({'q': params['q'], 'g': params['g'], 'y': params['y'], 'Witness': witness})
+    
+    sendObject(conn, params)
+    
+    r = random.randint(1, params['q'])
+    a = pow(params['g'], r, params['q'])
+    
+    print("-------- Generated Commitment --------")
+    pprint({'r': r, 'a': a})
+    
+    sendObject(conn, a)
+
+    challenge = recvObject(conn)
+    
+    print("Received Challenge:", challenge)
+    
+    if isinstance(challenge, int):
+        t = r + (challenge * witness)
+    else:
+        t = [r + (challenge[0] * witness), r + (challenge[1] * witness)]
+        print("Witness:", witness)
+    
+    print("Generated Response:", t)
+    
+    sendObject(conn, t)
+    
+    print("-------------------------- END --------------------------\n\n")
+
+
+def __root(conn):
+    print('# ┌─┐ ┌┬┐┬ ┬  ╦═╗┌─┐┌─┐┌┬┐  ╔╦╗┌─┐┌┬┐┬ ┬┬  ┌─┐ #')
+    print('# ├┤───│ ├─┤  ╠╦╝│ ││ │ │   ║║║│ │ │││ ││  │ │ #')
+    print('# └─┘  ┴ ┴ ┴  ╩╚═└─┘└─┘ ┴   ╩ ╩└─┘─┴┘└─┘┴─┘└─┘ #')
+    
+    print("-------- Generated Parameters --------")
+    
+    params = root.modulus(20)
+    e = root.get_e(10)
+    witnessObj = root.getWitness(params['n'], e)
+    
+    pprint({'Params': params, 'Witness': witnessObj})
+    
+    x = witnessObj['x']
+    y = witnessObj['y']
+    
+    sendObject(conn, {'params': params, 'e': e, 'y': y})
+    
+    commitmentObj = root.getCommitment(params['n'], e)
+    
+    sendObject(conn, commitmentObj['a'])
+    
+    c = recvObject(conn)
+    
+    t = root.getResponse(commitmentObj['r'], x, c, params['n'])
+    
+    if not isinstance(t, int):
+        print("Witness:", x % params['n'])
+    
+    sendObject(conn, t)
+    
+    print("-------------------------- END --------------------------\n\n")
+
 def __knowledgeRepresentation(conn):
     
     print('# ╦═╗┌─┐┌─┐┬─┐┌─┐┌─┐┌─┐┌┐┌┌┬┐┌─┐┌┬┐┬┌─┐┌┐┌  ┌─┐┌─┐ #')
@@ -212,38 +214,6 @@ def __knowledgeRepresentation(conn):
     sendObject(conn, t)
     print("-------------------------- END --------------------------\n\n")
 
-def __root(conn):
-    print('# ┌─┐ ┌┬┐┬ ┬  ╦═╗┌─┐┌─┐┌┬┐  ╔╦╗┌─┐┌┬┐┬ ┬┬  ┌─┐ #')
-    print('# ├┤───│ ├─┤  ╠╦╝│ ││ │ │   ║║║│ │ │││ ││  │ │ #')
-    print('# └─┘  ┴ ┴ ┴  ╩╚═└─┘└─┘ ┴   ╩ ╩└─┘─┴┘└─┘┴─┘└─┘ #')
-    
-    print("-------- Generated Parameters --------")
-    
-    params = root.modulus(20)
-    e = root.get_e(10)
-    witnessObj = root.getWitness(params['n'], e)
-    
-    pprint({'Params': params, 'Witness': witnessObj})
-    
-    x = witnessObj['x']
-    y = witnessObj['y']
-    
-    sendObject(conn, {'params': params, 'e': e, 'y': y})
-    
-    commitmentObj = root.getCommitment(params['n'], e)
-    
-    sendObject(conn, commitmentObj['a'])
-    
-    c = recvObject(conn)
-    
-    t = root.getResponse(commitmentObj['r'], x, c, params['n'])
-    
-    if not isinstance(t, int):
-        print("Witness:", x % params['n'])
-    
-    sendObject(conn, t)
-    
-    print("-------------------------- END --------------------------\n\n")
 
 def __equality(conn):
     print('# ╔═╗┌─┐ ┬ ┬┌─┐┬  ┬┌┬┐┬ ┬  ┌─┐┌─┐  ╔╦╗┬┌─┐┌─┐┬─┐┌─┐┌┬┐┌─┐  ╦  ┌─┐┌─┐ #')
@@ -275,6 +245,41 @@ def __equality(conn):
     sendObject(conn, t)
     
     print("-------------------------- END --------------------------\n\n")
+
+
+def __feigeFiatShamir(conn):
+    print('# ╔═╗┌─┐┬┌─┐┌─┐  ╔═╗┬┌─┐┌┬┐  ╔═╗┬ ┬┌─┐┌┬┐┬┬─┐ #')
+    print('# ╠╣ ├┤ ││ ┬├┤───╠╣ │├─┤ │───╚═╗├─┤├─┤││││├┬┘ #')
+    print('# ╚  └─┘┴└─┘└─┘  ╚  ┴┴ ┴ ┴   ╚═╝┴ ┴┴ ┴┴ ┴┴┴└─ #')
+    
+    print("-------- Generated Parameters --------")
+    
+    params = feigeFiatShamir.generateLargePrimes(512)
+    
+    pprint({'p': params['p'], 'q': params['q'], 'N': params['N'], 'k': params['k']})
+    
+    S = feigeFiatShamir.createSecretNumbers(params)
+    print("Witness:", S)
+    
+    V = feigeFiatShamir.getModularSquare(params, S)
+    print("V:", V)
+    
+    sendObject(conn, {'N': params['N'], 'V': V, 'k': params['k']})
+    
+    r, x = feigeFiatShamir.commitment(params)
+    print("-------- Generated Commitment --------")
+    pprint({'r': r, 'x': x})
+    sendObject(conn, {'r': r, 'x': x})
+    
+    A = recvObject(conn)
+    print("Challenge:", A)
+    
+    Y = feigeFiatShamir.computeY(params, r, S, A)
+    print("Y:", Y)
+    sendObject(conn, Y)
+    
+    print("-------------------------- END --------------------------\n\n")    
+
 
 def handleClient(connection, address):
     print("New Client:", address)
