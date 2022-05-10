@@ -15,7 +15,7 @@ import root
 import equality
 
 HOST = '127.0.0.1'
-PORT = 27898
+PORT = 27899
 
 prover_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -158,8 +158,10 @@ def __root(conn):
     sendObject(conn, commitmentObj['a'])
     
     c = recvObject(conn)
+    print("Challenge:", c)
     
     t = root.getResponse(commitmentObj['r'], x, c, params['n'])
+    print("Generated Response:", t)
     
     if not isinstance(t, int):
         print("Witness:", x % params['n'])

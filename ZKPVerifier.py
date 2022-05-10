@@ -16,7 +16,7 @@ import equality
 from networkx.utils.misc import graphs_equal
 
 HOST = '127.0.0.1'
-PORT = 27898
+PORT = 27899
 
 verifier_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 verifier_socket.connect((HOST, PORT))
@@ -151,22 +151,25 @@ def __root(attack=False):
     params = paramsObj['params']
     e = paramsObj['e']
     y = paramsObj['y']
-    
+    pprint({"Params": params, "e": e, "y": y})
+
     a = recvObject()
-    
+    print("Commitment:", a)
     if not attack:
         c = random.randint(1, e-1)
     else:
         c = [random.randint(0, e), random.randint(0, e)]
         
+    print("Challenge Generated:", c)
     sendObject(c)
     
     t = recvObject()
+    print("Response Received:", t)
     
     if not attack:
         LHS = pow(t, e, params['n'])
         RHS = (a * pow(y, c)) % params['n']
-        
+        pprint({"LHS": LHS, "RHS": RHS})
         print(LHS == RHS)
         
         assert (LHS == RHS), "Proof failed"
