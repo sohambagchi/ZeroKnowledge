@@ -287,9 +287,9 @@ def __feigeFiatShamir(attack=False):
     print("Y:", Y)
     Y2, XV = feigeFiatShamir.computeY2(params, Y, x, V, A)
     
-    print(Y2 == XV)
+    print(Y2 == XV or Y2 == -1 * XV)
 
-    assert (Y2 == XV), "Proof failed"
+    assert (Y2 == XV or Y2 == -1 * XV), "Proof failed"
 
     print("-------------------------- END --------------------------\n\n")
 
