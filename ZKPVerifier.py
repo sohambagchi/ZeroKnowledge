@@ -1,13 +1,9 @@
 import socket
-import networkx as nx
-import json
 import pickle
 import struct
 import random
-import time
 from pprint import pprint
 
-import discreteLog
 import graphIsomorphism
 import feigeFiatShamir
 import root
@@ -16,7 +12,7 @@ import equality
 from networkx.utils.misc import graphs_equal
 
 HOST = '127.0.0.1'
-PORT = 27869
+PORT = 27866
 
 verifier_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 verifier_socket.connect((HOST, PORT))
@@ -238,7 +234,7 @@ def __equality():
     print('-------- Received Parameters --------')
     params = recvObject()
     
-    pprint({'Group': {'q': q}, 'Generators': {'g': params['g'], 'h': params['h']}, 'Elements': {'y': params['y'], 'z': params['z']}})
+    pprint({'Group': {'q': params['q']}, 'Generators': {'g': params['g'], 'h': params['h']}, 'Elements': {'y': params['y'], 'z': params['z']}})
     
     print('-------- Received Commitment --------')
     commitment = recvObject()
@@ -291,11 +287,10 @@ def __feigeFiatShamir(attack=False):
     print("Y:", Y)
     Y2, XV = feigeFiatShamir.computeY2(params, Y, x, V, A)
     
-    if all(Y2[_] == XV[_] for _ in range(params['k'])) == True:
-        print(True)
-    
-    assert all(Y2[i] == XV[i] for i in range(params['k'])), "Verification failed"
-    
+    print(Y2 == XV)
+
+    assert (Y2 == XV), "Proof failed"
+
     print("-------------------------- END --------------------------\n\n")
 
 

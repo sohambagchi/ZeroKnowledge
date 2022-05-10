@@ -3,7 +3,6 @@ import threading
 import random
 import pickle
 import struct
-import time
 
 from pprint import pprint
 
@@ -15,7 +14,7 @@ import root
 import equality
 
 HOST = '127.0.0.1'
-PORT = 27869
+PORT = 27866
 
 prover_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
@@ -226,7 +225,7 @@ def __equality(conn):
     q = equality.createGroup()
     params, witness = equality.generateParams(q)
     
-    pprint({'Group': {'q': q}, 'Generators': {'g': params['g'], 'h': params['h']}, 'Elements': {'y': params['y'], 'z': params['z']}})
+    pprint({'Group': {'q': q}, 'Generators': {'g': params['g'], 'h': params['h']}, 'Elements': {'y': params['y'], 'z': params['z']}, 'Witness': witness})
     
     sendObject(conn, params)
     

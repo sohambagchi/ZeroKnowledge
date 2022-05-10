@@ -45,22 +45,17 @@ def getBooleanString(params):
     return A
 
 def computeY(params, r, S, A):
-    Y = list()
+    Y = r
     for i in range(params['k']):
-        Y.append((r * (S[i]**A[i])) % params['N'])
-    return Y
+        Y *= pow(S[i], A[i])
+    return Y % params['N']
 
 def computeY2(params, Y, x, V, A):
-    Y2 = list()
-    for y in Y:
-        Y2.append((y**2) % params['N'])
-    
-    XV = list()
-    
+    Y2 = Y**2 % params['N']
+    XV = x
     for i in range(params['k']):
-        XV.append((x * (V[i]**A[i])) % params['N'])
-    
-    return Y2, XV
+        XV *= pow(V[i], A[i])
+    return Y2, XV % params['N']
     
 if __name__ == '__main__':
     nbits = 512
@@ -102,8 +97,10 @@ if __name__ == '__main__':
     print("----------------")
     print(XV)
 
-    for i in range(len(Y2)):
-        if (Y2[i] != XV[i]):
-            print(Y2[i], XV[i])
-        else:
-            print(Y2[i] == XV[i])
+    # for i in range(len(Y2)):
+    #     if (Y2[i] != XV[i]):
+    #         print(Y2[i], XV[i])
+    #     else:
+    #         print(Y2[i] == XV[i])
+
+    print(Y2 == XV)
