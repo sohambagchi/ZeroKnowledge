@@ -15,7 +15,7 @@ import root
 import equality
 
 HOST = '127.0.0.1'
-PORT = 27899
+PORT = 27869
 
 prover_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 

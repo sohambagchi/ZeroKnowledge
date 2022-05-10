@@ -16,7 +16,7 @@ import equality
 from networkx.utils.misc import graphs_equal
 
 HOST = '127.0.0.1'
-PORT = 27899
+PORT = 27869
 
 verifier_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 verifier_socket.connect((HOST, PORT))
@@ -156,7 +156,7 @@ def __root(attack=False):
     a = recvObject()
     print("Commitment:", a)
     if not attack:
-        c = random.randint(1, e-1)
+        c = random.randint(0, e)
     else:
         c = [random.randint(0, e), random.randint(0, e)]
         
@@ -187,12 +187,12 @@ def __root(attack=False):
     print("-------------------------- END --------------------------\n\n")
 
 def __knowledgeRepresentation():
-    print('# ╦═╗┌─┐┌─┐┬─┐┌─┐┌─┐┌─┐┌┐┌┌┬┐┌─┐┌┬┐┬┌─┐┌┐┌  ┌─┐┌─┐ #')
-    print('# ╠╦╝├┤ ├─┘├┬┘├┤ └─┐├┤ │││ │ ├─┤ │ ││ ││││  │ │├┤  #')
-    print('# ╩╚═└─┘┴  ┴└─└─┘└─┘└─┘┘└┘ ┴ ┴ ┴ ┴ ┴└─┘┘└┘  └─┘└   #')
-    print('#           ╦╔═┌┐┌┌─┐┬ ┬┬  ┌─┐┌┬┐┌─┐┌─┐            #')
-    print('#           ╠╩╗││││ │││││  ├┤  │││ ┬├┤             #')
-    print('#           ╩ ╩┘└┘└─┘└┴┘┴─┘└─┘─┴┘└─┘└─┘            #')
+    print('#    ╦╔═┌┐┌┌─┐┬ ┬┬  ┌─┐┌┬┐┌─┐┌─┐  ┌─┐┌─┐    #')
+    print('#    ╠╩╗││││ │││││  ├┤  │││ ┬├┤   │ │├┤     #')
+    print('#    ╩ ╩┘└┘└─┘└┴┘┴─┘└─┘─┴┘└─┘└─┘  └─┘└      #')
+    print('# ╦═╗┌─┐┌─┐┬─┐┌─┐┌─┐┌─┐┌┐┌┌┬┐┌─┐┌┬┐┬┌─┐┌┐┌  #')
+    print('# ╠╦╝├┤ ├─┘├┬┘├┤ └─┐├┤ │││ │ ├─┤ │ ││ ││││  #')
+    print('# ╩╚═└─┘┴  ┴└─└─┘└─┘└─┘┘└┘ ┴ ┴ ┴ ┴ ┴└─┘┘└┘  #')
     
     print("-------- Received Parameters --------")
     
